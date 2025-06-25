@@ -18,7 +18,7 @@ app.use(express.urlencoded({ extended: true, limit: "5mb" }));
 // CORS middleware (must be before routes)
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: "https://snazzy-tapioca-9426a0.netlify.app",
     credentials: true,
   })
 );
