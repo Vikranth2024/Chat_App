@@ -18,7 +18,7 @@ app.use(express.urlencoded({ extended: true, limit: "5mb" }));
 // CORS middleware (must be before routes)
 app.use(
   cors({
-    origin: "https://snazzy-tapioca-9426a0.netlify.app",
+    origin: "https://chat-app-gray-seven.vercel.app",
     credentials: true,
   })
 );
