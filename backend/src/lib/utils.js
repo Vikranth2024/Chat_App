@@ -6,9 +6,9 @@ export const generateToken = (userId, res) => {
   });
 
   res.cookie("jwt", token, {
-    httpOnly: true,
-    secure: true,        // Must be true in production for HTTPS
-    sameSite: "None",    // Allow cross-site cookies
-    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    maxAge: 7 * 24 * 60 * 60 * 1000, // MS
+    httpOnly: true, // prevent XSS attacks cross-site scripting attacks
+    sameSite: "lax", // More permissive for local dev across ports
+    secure: process.env.NODE_ENV !== "development",
   });
 };

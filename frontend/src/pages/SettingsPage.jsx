@@ -1,126 +1,202 @@
-// import { THEMES } from "../constants";
-// import { useThemeStore } from "../store/useThemeStore";
-// import { Send } from "lucide-react";
-
-// const PREVIEW_MESSAGES = [
-//   { id: 1, content: "Hey! How's it going?", isSent: false },
-//   { id: 2, content: "I'm doing great! Just working on some new features.", isSent: true },
-// ];
-
-// const SettingsPage = () => {
-//   const { theme, setTheme } = useThemeStore();
-
-//   return (
-//     <div className="h-screen container mx-auto px-4 pt-20 max-w-5xl">
-//       <div className="space-y-6">
-//         <div className="flex flex-col gap-1">
-//           <h2 className="text-lg font-semibold">Theme</h2>
-//           <p className="text-sm text-base-content/70">Choose a theme for your chat interface</p>
-//         </div>
-
-//         <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2">
-//           {THEMES.map((t) => (
-//             <button
-//               key={t}
-//               className={`
-//                 group flex flex-col items-center gap-1.5 p-2 rounded-lg transition-colors
-//                 ${theme === t ? "bg-base-200" : "hover:bg-base-200/50"}
-//               `}
-//               onClick={() => setTheme(t)}
-//             >
-//               <div className="relative h-8 w-full rounded-md overflow-hidden" data-theme={t}>
-//                 <div className="absolute inset-0 grid grid-cols-4 gap-px p-1">
-//                   <div className="rounded bg-primary"></div>
-//                   <div className="rounded bg-secondary"></div>
-//                   <div className="rounded bg-accent"></div>
-//                   <div className="rounded bg-neutral"></div>
-//                 </div>
-//               </div>
-//               <span className="text-[11px] font-medium truncate w-full text-center">
-//                 {t.charAt(0).toUpperCase() + t.slice(1)}
-//               </span>
-//             </button>
-//           ))}
-//         </div>
-
-//         {/* Preview Section */}
-//         <h3 className="text-lg font-semibold mb-3">Preview</h3>
-//         <div className="rounded-xl border border-base-300 overflow-hidden bg-base-100 shadow-lg">
-//           <div className="p-4 bg-base-200">
-//             <div className="max-w-lg mx-auto">
-//               {/* Mock Chat UI */}
-//               <div className="bg-base-100 rounded-xl shadow-sm overflow-hidden">
-//                 {/* Chat Header */}
-//                 <div className="px-4 py-3 border-b border-base-300 bg-base-100">
-//                   <div className="flex items-center gap-3">
-//                     <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-primary-content font-medium">
-//                       J
-//                     </div>
-//                     <div>
-//                       <h3 className="font-medium text-sm">John Doe</h3>
-//                       <p className="text-xs text-base-content/70">Online</p>
-//                     </div>
-//                   </div>
-//                 </div>
-
-//                 {/* Chat Messages */}
-//                 <div className="p-4 space-y-4 min-h-[200px] max-h-[200px] overflow-y-auto bg-base-100">
-//                   {PREVIEW_MESSAGES.map((message) => (
-//                     <div
-//                       key={message.id}
-//                       className={`flex ${message.isSent ? "justify-end" : "justify-start"}`}
-//                     >
-//                       <div
-//                         className={`
-//                           max-w-[80%] rounded-xl p-3 shadow-sm
-//                           ${message.isSent ? "bg-primary text-primary-content" : "bg-base-200"}
-//                         `}
-//                       >
-//                         <p className="text-sm">{message.content}</p>
-//                         <p
-//                           className={`
-//                             text-[10px] mt-1.5
-//                             ${message.isSent ? "text-primary-content/70" : "text-base-content/70"}
-//                           `}
-//                         >
-//                           12:00 PM
-//                         </p>
-//                       </div>
-//                     </div>
-//                   ))}
-//                 </div>
-
-//                 {/* Chat Input */}
-//                 <div className="p-4 border-t border-base-300 bg-base-100">
-//                   <div className="flex gap-2">
-//                     <input
-//                       type="text"
-//                       className="input input-bordered flex-1 text-sm h-10"
-//                       placeholder="Type a message..."
-//                       value="This is a preview"
-//                       readOnly
-//                     />
-//                     <button className="btn btn-primary h-10 min-h-0">
-//                       <Send size={18} />
-//                     </button>
-//                   </div>
-//                 </div>
-//               </div>
-//             </div>
-//           </div>
-//         </div>
-//       </div>
-//     </div>
-//   );
-// };
-// export default SettingsPage;
-
-import React from 'react'
+import { useState } from "react";
+import { useAuthStore } from "../store/useAuthStore";
+import { useThemeStore } from "../store/useThemeStore";
+import { THEMES } from "../constants";
+import { 
+  User, 
+  Palette, 
+  Bell, 
+  Shield, 
+  Camera, 
+  Mail, 
+  Info, 
+  Calendar,
+  Check,
+  ChevronRight
+} from "lucide-react";
 
 const SettingsPage = () => {
-  return (
-    <div>SettingsPage</div>
-  )
-}
+  const { authUser, isUpdatingProfile, updateProfile } = useAuthStore();
+  const { theme, setTheme } = useThemeStore();
+  const [activeTab, setActiveTab] = useState("profile");
+  const [selectedImg, setSelectedImg] = useState(null);
 
-export default SettingsPage
+  const getInitials = (name) => {
+    return name?.charAt(0).toUpperCase() || "?";
+  };
+
+   const handleImageUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = async () => {
+      const base64Image = reader.result;
+      setSelectedImg(base64Image);
+      await updateProfile({ profilePic: base64Image });
+    };
+  };
+
+  const tabs = [
+    { id: "profile", label: "Profile", icon: User },
+    { id: "appearance", label: "Appearance", icon: Palette },
+  ];
+
+
+  return (
+    <div className="min-h-screen futuristic-bg flex flex-col font-['Outfit']">
+      <div className="h-24 shrink-0" />
+      <div className="flex-1 pb-20 px-4 sm:px-6">
+        <div className="max-w-5xl mx-auto">
+          <div className="grid lg:grid-cols-[280px_1fr] gap-8">
+            
+            {/* Sidebar Navigation */}
+            <div className="space-y-3">
+              <h1 className="text-4xl font-black text-base-content tracking-tighter px-4 mb-8">Settings</h1>
+              {tabs.map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`w-full flex items-center gap-4 px-6 py-4 rounded-[1.5rem] font-black transition-all ${
+                    activeTab === tab.id 
+                    ? "glass text-primary shadow-xl shadow-primary/10 border border-primary/20 scale-[1.05]" 
+                    : "text-base-content/40 hover:bg-base-content/5 hover:text-base-content"
+                  }`}
+                >
+                  <tab.icon className="size-5" />
+                  <span className="text-[15px] tracking-tight uppercase">{tab.label}</span>
+                </button>
+              ))}
+            </div>
+
+            {/* Main Content Area */}
+            <div className="glass rounded-[3rem] neo-shadow border border-white/10 overflow-hidden flex flex-col min-h-[600px] animate-scale-in">
+              
+              {/* Header */}
+              <div className="p-10 border-b border-white/5">
+                 <h2 className="text-2xl font-black text-base-content tracking-tighter capitalize">{activeTab}</h2>
+                 <p className="text-md text-base-content/40 font-medium tracking-tight">Manage your account {activeTab} settings.</p>
+              </div>
+
+              <div className="flex-1 overflow-y-auto p-10 custom-scrollbar">
+                 
+                 {/* Profile Tab */}
+                 {activeTab === "profile" && (
+                   <div className="space-y-12 animate-fade-in">
+                      <div className="flex flex-col items-center sm:flex-row sm:items-start gap-10">
+                        <div className="relative group">
+                          {selectedImg || authUser?.profilePic ? (
+                            <img
+                              src={selectedImg || authUser.profilePic}
+                              alt="Profile"
+                              className="size-40 rounded-[2.5rem] object-cover border-4 border-primary/20 shadow-2xl transition-all group-hover:scale-105"
+                            />
+                          ) : (
+                            <div className="size-40 rounded-[2.5rem] bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center text-white font-black text-5xl shadow-2xl transition-all group-hover:scale-105">
+                              {getInitials(authUser?.fullName)}
+                            </div>
+                          )}
+                          <label
+                            htmlFor="avatar-upload"
+                            className={`
+                              absolute -bottom-3 -right-3 
+                              bg-primary hover:bg-primary-focus
+                              p-4 rounded-[1.2rem] cursor-pointer 
+                              transition-all shadow-xl shadow-primary/40
+                              ${isUpdatingProfile ? "animate-pulse pointer-events-none" : ""}
+                            `}
+                          >
+                            <Camera className="w-6 h-6 text-white" />
+                            <input
+                              type="file"
+                              id="avatar-upload"
+                              className="hidden"
+                              accept="image/*"
+                              onChange={handleImageUpload}
+                              disabled={isUpdatingProfile}
+                            />
+                          </label>
+                        </div>
+
+                        <div className="flex-1 space-y-4 text-center sm:text-left pt-2">
+                          <h3 className="text-3xl font-black text-base-content tracking-tighter">{authUser?.fullName}</h3>
+                          <div className="flex flex-wrap justify-center sm:justify-start gap-3">
+                             <div className="px-4 py-1.5 glass rounded-full border border-primary/10 flex items-center gap-2">
+                                <div className="size-2 bg-success rounded-full animate-ping" />
+                                <span className="text-[11px] font-black uppercase tracking-widest text-success/80">Active</span>
+                             </div>
+                             <div className="px-4 py-1.5 glass rounded-full border border-base-content/5 flex items-center gap-2">
+                                <Mail className="size-3.5 text-base-content/40" />
+                                <span className="text-[11px] font-bold text-base-content/60">{authUser?.email}</span>
+                             </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="grid sm:grid-cols-2 gap-6">
+                        <div className="glass p-6 rounded-[2rem] border border-white/5 space-y-1.5">
+                           <div className="flex items-center gap-3 text-base-content/40 mb-2">
+                              <Calendar className="size-4" />
+                              <span className="text-[11px] font-black uppercase tracking-widest">Member Since</span>
+                           </div>
+                           <p className="text-xl font-black text-base-content tracking-tight">{authUser?.createdAt?.split("T")[0]}</p>
+                        </div>
+                        <div className="glass p-6 rounded-[2rem] border border-white/5 space-y-1.5">
+                           <div className="flex items-center gap-3 text-base-content/40 mb-2">
+                              <Shield className="size-4" />
+                              <span className="text-[11px] font-black uppercase tracking-widest">Security Level</span>
+                           </div>
+                           <p className="text-xl font-black text-primary tracking-tight">Verified Account</p>
+                        </div>
+                      </div>
+                   </div>
+                 )}
+
+                 {/* Appearance Tab */}
+                 {activeTab === "appearance" && (
+                   <div className="space-y-10 animate-fade-in">
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-6">
+                        {THEMES.map((t) => (
+                          <button
+                            key={t}
+                            onClick={() => setTheme(t)}
+                            className={`
+                              group flex flex-col items-center gap-4 transition-all
+                              ${theme === t ? "scale-105" : "hover:scale-102 opacity-60 hover:opacity-100"}
+                            `}
+                          >
+                            <div 
+                              className="w-full aspect-square rounded-[2rem] p-3 shadow-2xl transition-all border-4"
+                              style={{ 
+                                borderColor: theme === t ? 'var(--color-primary)' : 'transparent',
+                                backgroundColor: t === 'dark' ? '#0f172a' : '#f8fafc' 
+                              }}
+                            >
+                               <div className="w-full h-full glass rounded-[1.2rem] flex flex-col p-2 gap-1.5">
+                                  <div className="h-3 w-3/4 bg-primary/20 rounded-full" />
+                                  <div className="h-3 w-1/2 bg-primary/40 rounded-full" />
+                               </div>
+                            </div>
+                            <span className={`text-[11px] font-black uppercase tracking-[0.2em] ${theme === t ? "text-primary" : "text-base-content/40"}`}>
+                              {t}
+                            </span>
+                          </button>
+                        ))}
+                      </div>
+                   </div>
+                 )}
+
+              </div>
+            </div>
+
+
+
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default SettingsPage;
