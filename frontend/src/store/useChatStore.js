@@ -106,9 +106,8 @@ export const useChatStore = create((set, get) => ({
     socket.off("messageDeleted");
 
     socket.on("newMessage", (newMessage) => {
-      // (Existing newMessage logic remains same, just ensuring scope is correct)
       const { selectedUser } = get();
-      if (!selectedUser) return; // Add check
+      if (!selectedUser) return;
 
       if (newMessage.senderId === selectedUser._id) {
         set((state) => ({
@@ -116,11 +115,9 @@ export const useChatStore = create((set, get) => ({
         }));
       }
       
-      // Update unread counts and users list... (keeping existing logic for brevity if implied, but I Must rewrite it to be safe)
+      // Update unread counts and users list
       set((state) => {
           const isFromSelectedUser = state.selectedUser && newMessage.senderId === state.selectedUser._id;
-          // ... (rest of logic)
-          // To fetch precise state again inside set
           const unreadCounts = { ...state.unreadCounts };
           if (!isFromSelectedUser) {
              unreadCounts[newMessage.senderId] = (unreadCounts[newMessage.senderId] || 0) + 1;

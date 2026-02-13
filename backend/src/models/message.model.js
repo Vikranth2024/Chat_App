@@ -18,6 +18,15 @@ const messageSchema = new mongoose.Schema(
     image: {
       type: String,
     },
+    originalLanguage: {
+        type: String,
+        default: "en",
+    },
+    translations: {
+        type: Map,
+        of: String, // e.g., { "hi": "नमस्ते", "fr": "Bonjour" }
+        default: {},
+    },
     deletedBy: {
         type: [mongoose.Schema.Types.ObjectId],
         ref: "User",

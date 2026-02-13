@@ -188,9 +188,21 @@ const ChatContainer = () => {
                     
                     <div className="flex items-end gap-3 min-w-[60px]">
                         {message.text && (
-                        <p className="text-[15px] leading-relaxed font-medium">
-                            {message.text}
-                        </p>
+                        <div className="flex flex-col">
+                            <p className="text-[15px] leading-relaxed font-medium">
+                                {/* Display translation if available for user's preferred language, otherwise original text */}
+                                {message.translations && (message.translations instanceof Map ? message.translations.get(authUser.preferredLanguage) : message.translations[authUser.preferredLanguage])
+                                    ? (message.translations instanceof Map ? message.translations.get(authUser.preferredLanguage) : message.translations[authUser.preferredLanguage])
+                                    : message.text}
+                            </p>
+                            {/* Indicator for translation */}
+                            {message.translations && (message.translations instanceof Map ? message.translations.get(authUser.preferredLanguage) : message.translations[authUser.preferredLanguage]) && (
+                                <div className="flex items-center gap-1.5 mt-1 opacity-50">
+                                    <div className="size-1 rounded-full bg-current"/>
+                                    <span className="text-[9px] uppercase tracking-widest font-black">AI Translated</span>
+                                </div>
+                            )}
+                        </div>
                         )}
                         <span className={`text-[10px] whitespace-nowrap opacity-60 font-black tracking-widest ml-auto ${isSentByMe ? "text-primary-content" : "text-base-content"}`}>
                         {formatMessageTime(message.createdAt)}

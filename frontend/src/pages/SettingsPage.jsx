@@ -134,6 +134,31 @@ const SettingsPage = () => {
                         </div>
                       </div>
 
+                      {/* Language Preference */}
+                       <div className="glass p-6 rounded-[2rem] border border-white/5 space-y-3">
+                          <label className="text-md font-bold text-base-content/60">Preferred Language</label>
+                          <select 
+                            className="select select-bordered w-full rounded-xl bg-base-200/50"
+                            value={authUser?.preferredLanguage || "en"}
+                            onChange={(e) => updateProfile({ preferredLanguage: e.target.value })}
+                            disabled={isUpdatingProfile}
+                          >
+                            <option value="en">English (Default)</option>
+                            <option value="hi">Hindi (हिंदी)</option>
+                            <option value="ta">Tamil (தமிழ்)</option>
+                            <option value="es">Spanish (Español)</option>
+                            <option value="fr">French (Français)</option>
+                            <option value="de">German (Deutsch)</option>
+                            <option value="it">Italian (Italiano)</option>
+                            <option value="pt">Portuguese (Português)</option>
+                            <option value="ru">Russian (Русский)</option>
+                            <option value="ja">Japanese (日本語)</option>
+                            <option value="ko">Korean (한국어)</option>
+                            <option value="zh">Chinese (中文)</option>
+                          </select>
+                          <p className="text-xs text-base-content/40">Incoming messages will be translated to this language.</p>
+                       </div>
+
                       <div className="grid sm:grid-cols-2 gap-6">
                         <div className="glass p-6 rounded-[2rem] border border-white/5 space-y-1.5">
                            <div className="flex items-center gap-3 text-base-content/40 mb-2">
