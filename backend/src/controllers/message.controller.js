@@ -2,6 +2,7 @@ import User from "../models/user.model.js";
 import Message from "../models/message.model.js";
 import cloudinary from "../lib/cloudinary.js";
 import { getReceiverSocketId, io } from "../lib/socket.js";
+import { translateText } from "../lib/ai.js";
 
 export const getUsersForSidebar = async (req, res) => {
   try {
@@ -28,7 +29,16 @@ export const getMessages = async (req, res) => {
       isDeleted: { $ne: true } // Exclude messages deleted for everyone
     });
 
-    res.status(200).json(messages);
+    // Convert Mongoose Maps to plain objects for proper serialization
+    const messagesWithTranslations = messages.map(msg => {
+      const msgObj = msg.toObject();
+      if (msgObj.translations && msgObj.translations instanceof Map) {
+        msgObj.translations = Object.fromEntries(msgObj.translations);
+      }
+      return msgObj;
+    });
+
+    res.status(200).json(messagesWithTranslations);
   } catch (error) {
     console.log("Error in getMessages controller: ", error.message);
     res.status(500).json({ error: "Internal server error" });
@@ -47,21 +57,51 @@ export const sendMessage = async (req, res) => {
       imageUrl = uploadResponse.secure_url;
     }
 
+    // --- AI Translation Logic ---
+    const receiver = await User.findById(receiverId);
+    let translations = {};
+    
+    if (receiver && text) {
+        const targetLang = receiver.preferredLanguage || "en";
+        
+        if (targetLang !== "en") {
+            const translatedText = await translateText(text, targetLang);
+            
+            if (translatedText && translatedText !== text) {
+                translations[targetLang] = translatedText;
+                console.log(`Translation: "${text}" → [${targetLang}] "${translatedText}"`);
+            }
+        }
+    }
+    // -----------------------------
+
     const newMessage = new Message({
       senderId,
       receiverId,
       text,
       image: imageUrl,
+      originalLanguage: "en",
+      translations
     });
 
     await newMessage.save();
 
+    // Convert to plain object and manually serialize the translations Map
+    const messageObject = newMessage.toObject();
+    
+    // Mongoose Maps don't serialize well - convert to plain object
+    if (messageObject.translations && messageObject.translations instanceof Map) {
+      messageObject.translations = Object.fromEntries(messageObject.translations);
+    }
+    
+    console.log("Translation: Sending message with translations:", JSON.stringify(messageObject.translations));
+    
     const receiverSocketId = getReceiverSocketId(receiverId);
     if (receiverSocketId) {
-      io.to(receiverSocketId).emit("newMessage", newMessage);
+      io.to(receiverSocketId).emit("newMessage", messageObject);
     }
 
-    res.status(201).json(newMessage);
+    res.status(201).json(messageObject);
   } catch (error) {
     console.log("Error in sendMessage controller: ", error.message);
     res.status(500).json({ error: "Internal server error" });
