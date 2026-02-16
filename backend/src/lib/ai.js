@@ -3,7 +3,7 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-const genAI = new GoogleGenerativeAI("AIzaSyAu7-b4rchMBap3oKfgRIjZzit_gWHwn-k");
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 const languageMap = {
   "en": "English",
